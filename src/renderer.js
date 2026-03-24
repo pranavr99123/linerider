@@ -283,9 +283,12 @@ export class Renderer {
     const front = this.camera.worldToScreen(vehicle.points[1]);
     const top = this.camera.worldToScreen(vehicle.points[2]);
     const seat = this.camera.worldToScreen(vehicle.points[3]);
-    const head = this.camera.worldToScreen(vehicle.points[4]);
-    const hands = this.camera.worldToScreen(vehicle.points[5]);
     const scale = this.camera.zoom;
+    const grip = { x: front.x + 7 * scale, y: front.y - 23 * scale };
+    const riderTorso = {
+      x: seat.x * 0.72 + top.x * 0.28,
+      y: seat.y * 0.72 + top.y * 0.28 - 2 * scale,
+    };
     this.drawWheel(rear, 10 * scale, vehicle.visualState?.rearWheelSpin || 0);
     this.drawWheel(front, 10 * scale, vehicle.visualState?.frontWheelSpin || 0);
     ctx.save();
@@ -328,16 +331,15 @@ export class Renderer {
     ctx.restore();
     if (!vehicle.detachedRider) {
       this.drawSeatedRider({
-        torso: seat,
-        head,
-        hands,
-        leftFoot: { x: rear.x + 4 * scale, y: rear.y - 1 * scale },
-        rightFoot: { x: top.x + 4 * scale, y: top.y + 10 * scale },
-        lean: clamp((front.x - rear.x) * 0.006, -0.16, 0.16),
+        torso: riderTorso,
+        hands: grip,
+        leftFoot: { x: rear.x + 3 * scale, y: rear.y - 1 * scale },
+        rightFoot: { x: top.x + 2 * scale, y: top.y + 10 * scale },
+        lean: clamp((front.y - rear.y) * -0.003, -0.08, 0.08),
       });
       ctx.beginPath();
-      ctx.moveTo(hands.x, hands.y);
-      ctx.lineTo(front.x + 8 * scale, front.y - 24 * scale);
+      ctx.moveTo(riderTorso.x + 5 * scale, riderTorso.y - 3 * scale);
+      ctx.lineTo(grip.x, grip.y);
       ctx.stroke();
     }
   }

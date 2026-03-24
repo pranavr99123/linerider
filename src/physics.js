@@ -73,6 +73,7 @@ export class PhysicsEngine {
     if (this.vehicle.magnetTimer > 0) this.vehicle.magnetTimer = Math.max(0, this.vehicle.magnetTimer - dt);
     if (this.vehicle.slowmoTimer > 0) this.vehicle.slowmoTimer = Math.max(0, this.vehicle.slowmoTimer - dt);
     if (this.vehicle.teleportCooldown > 0) this.vehicle.teleportCooldown = Math.max(0, this.vehicle.teleportCooldown - dt);
+    if (this.vehicle.invulnerabilityTimer > 0) this.vehicle.invulnerabilityTimer = Math.max(0, this.vehicle.invulnerabilityTimer - dt);
 
     const gravityZone = this.track.data.gravityZones.find((zone) => zone.active !== false && detectRectHit(this.vehicle.getCenter(), zone));
     const currentGravity = gravityZone ? zoneGravity(gravityZone, this.gravity) : this.gravity;
@@ -82,18 +83,23 @@ export class PhysicsEngine {
 
     this.collisions = [];
     for (const point of this.vehicle.points) {
-      const vx = point.x - point.prevX;
-      const vy = point.y - point.prevY;
-      point.prevX = point.x;
-      point.prevY = point.y;
-      point.x += vx * (1 - currentDrag) + currentGravity.x * dt * dt;
-      point.y += vy * (1 - currentDrag) + currentGravity.y * dt * dt;
-      const collision = resolvePointVsSegments(point, segments, this.vehicle.definition.traction);
-      if (collision) {
-        this.collisions.push(collision);
-        if (collision.style.breakable) {
-          const hit = this.track.getSegmentById(collision.segment.id);
-          if (hit) hit.active = false;
+      const speed = Math.hypot(point.x - point.prevX, point.y - point.prevY) * 120;
+      const microSteps = Math.max(1, Math.min(6, Math.ceil(speed / 650)));
+      const stepDt = dt / microSteps;
+      for (let i = 0; i < microSteps; i += 1) {
+        const vx = point.x - point.prevX;
+        const vy = point.y - point.prevY;
+        point.prevX = point.x;
+        point.prevY = point.y;
+        point.x += vx * (1 - currentDrag) + currentGravity.x * stepDt * stepDt;
+        point.y += vy * (1 - currentDrag) + currentGravity.y * stepDt * stepDt;
+        const collision = resolvePointVsSegments(point, segments, this.vehicle.definition.traction);
+        if (collision) {
+          this.collisions.push(collision);
+          if (collision.style.breakable) {
+            const hit = this.track.getSegmentById(collision.segment.id);
+            if (hit) hit.active = false;
+          }
         }
       }
     }
@@ -143,6 +149,7 @@ export class PhysicsEngine {
   }
 
   evaluateState() {
+    if (this.vehicle.invulnerabilityTimer > 0) return;
     const speed = Math.hypot(this.vehicle.getVelocity().x, this.vehicle.getVelocity().y);
     const hardImpact = this.collisions.some((entry) => {
       const style = LINE_TYPES[entry.segment.type] || LINE_TYPES.normal;
@@ -156,7 +163,12 @@ export class PhysicsEngine {
       return point.contact?.hardContact && impactAlongNormal > this.vehicle.definition.crashSpeed * 0.58;
     });
     if (!this.vehicle.crashed && ((speed > this.vehicle.definition.crashSpeed && hardImpact) || violentWallStrike)) {
-      if (this.vehicle.shield > 0) this.vehicle.shield = 0;
+      if (this.vehicle.shield > 0) {
+        this.vehicle.shield = 0;
+        this.vehicle.invulnerabilityTimer = 0.45;
+        const velocity = this.vehicle.getVelocity();
+        this.vehicle.setVelocity({ x: velocity.x * 0.62, y: Math.min(velocity.y * 0.45, 240) });
+      }
       else {
         this.vehicle.crash();
         this.crashElapsed = 0;
@@ -197,6 +209,7 @@ export class PhysicsEngine {
     this.vehicle.setVelocity({ x: 0, y: 0 });
     this.vehicle.crashed = false;
     this.vehicle.shield = 0;
+    this.vehicle.invulnerabilityTimer = 0;
     this.vehicle.detachedRider = null;
     this.vehicle.grounded = false;
     this.crashElapsed = 0;

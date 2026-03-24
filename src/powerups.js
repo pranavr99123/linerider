@@ -1,5 +1,5 @@
 import { PICKUP_RADIUS } from "./config.js";
-import { dist } from "./utils.js";
+import { closestPointOnSegment, dist } from "./utils.js";
 
 export function applyPowerup(powerup, vehicle, simulation) {
   const velocity = vehicle.getVelocity();
@@ -24,13 +24,15 @@ export function collectPowerups(track, vehicle, simulation) {
     if (powerup.active === false) continue;
     if (powerup.type === "teleport") {
       if (vehicle.teleportCooldown > 0) continue;
-      if (dist(center, powerup) > PICKUP_RADIUS + 12) continue;
-      const enteredFromAbove = previousCenter.y < powerup.y - 2 && center.y >= powerup.y - 2;
-      if (!enteredFromAbove) continue;
+      const nearestOnPath = closestPointOnSegment(powerup, previousCenter, center).point;
+      const passedThroughNode = dist(nearestOnPath, powerup) <= PICKUP_RADIUS + 12
+        && center.y >= previousCenter.y
+        && previousCenter.y <= powerup.y + PICKUP_RADIUS;
+      if (!passedThroughNode) continue;
       const pair = track.data.powerups.find((item) => item.id !== powerup.id && item.type === "teleport" && item.pairId && item.pairId === powerup.pairId);
       if (pair) {
         const velocity = vehicle.getVelocity();
-        const exitOffset = { x: 0, y: -26 };
+        const exitOffset = { x: 0, y: -34 };
         for (const point of vehicle.points) {
           const dx = point.x - center.x;
           const dy = point.y - center.y;

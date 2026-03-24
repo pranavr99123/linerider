@@ -12,6 +12,5 @@ export const SAMPLE_TRACK = {
   powerups: [{ id: "p1", type: "speed", x: 460, y: -60, active: true }],
   checkpoints: [{ id: "c1", x: 700, y: -80 }],
   objects: [],
-  triggerZones: [],
   gravityZones: [],
 };

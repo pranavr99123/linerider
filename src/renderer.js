@@ -21,7 +21,6 @@ export class Renderer {
     this.drawStartFinish(state.track.data.start, state.track.data.finish);
     this.drawCheckpoints(state.track.data.checkpoints, state.physics.collectedCheckpoints);
     this.drawPowerups(state.track.data.powerups);
-    this.drawTriggerZones(state.track.data.triggerZones);
     this.drawGhost(state.replayGhost);
     this.drawVehicle(state.vehicle, state.motionTrails);
     this.drawEditorPreview(state.editorPreview);
@@ -175,20 +174,6 @@ export class Renderer {
     ctx.restore();
   }
 
-  drawTriggerZones(zones) {
-    const ctx = this.ctx;
-    for (const zone of zones) {
-      const a = this.camera.worldToScreen({ x: zone.x, y: zone.y });
-      ctx.save();
-      ctx.fillStyle = "rgba(0, 0, 0, 0.03)";
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.28)";
-      ctx.lineWidth = 1.5;
-      ctx.fillRect(a.x, a.y, zone.width * this.camera.zoom, zone.height * this.camera.zoom);
-      ctx.strokeRect(a.x, a.y, zone.width * this.camera.zoom, zone.height * this.camera.zoom);
-      ctx.restore();
-    }
-  }
-
   drawGravityZones(zones) {
     const ctx = this.ctx;
     for (const zone of zones) {
@@ -228,6 +213,9 @@ export class Renderer {
     ctx.save();
     ctx.strokeStyle = vehicle.crashed ? "#444444" : vehicle.definition.color;
     ctx.lineWidth = 2.5;
+    if (vehicle.grounded) {
+      this.drawGroundShadow(vehicle);
+    }
     this.drawVehicleShape(vehicle);
     if (vehicle.detachedRider) {
       this.drawDetachedRider(vehicle.detachedRider);
@@ -257,6 +245,7 @@ export class Renderer {
     const scale = this.camera.zoom;
     ctx.save();
     ctx.fillStyle = "#ffffff";
+    ctx.lineJoin = "round";
     ctx.beginPath();
     ctx.moveTo(rear.x, rear.y);
     ctx.quadraticCurveTo((rear.x + front.x) * 0.5, rear.y - 9 * scale, front.x, front.y);
@@ -269,6 +258,12 @@ export class Renderer {
     ctx.moveTo(seat.x, seat.y);
     ctx.lineTo(rear.x + 7 * scale, rear.y - 10 * scale);
     ctx.lineTo(front.x - 8 * scale, front.y - 11 * scale);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(rear.x - 6 * scale, rear.y + 2 * scale);
+    ctx.quadraticCurveTo(rear.x + 2 * scale, rear.y + 10 * scale, rear.x + 12 * scale, rear.y + 2 * scale);
+    ctx.moveTo(front.x - 12 * scale, front.y + 2 * scale);
+    ctx.quadraticCurveTo(front.x - 2 * scale, front.y + 10 * scale, front.x + 6 * scale, front.y + 1 * scale);
     ctx.stroke();
     ctx.restore();
     if (!vehicle.detachedRider) {
@@ -298,10 +293,22 @@ export class Renderer {
       ctx.arc(wheel.x, wheel.y, 10 * this.camera.zoom, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(wheel.x - 10 * scale, wheel.y);
+      ctx.lineTo(wheel.x + 10 * scale, wheel.y);
+      ctx.moveTo(wheel.x, wheel.y - 10 * scale);
+      ctx.lineTo(wheel.x, wheel.y + 10 * scale);
+      ctx.moveTo(wheel.x - 7 * scale, wheel.y - 7 * scale);
+      ctx.lineTo(wheel.x + 7 * scale, wheel.y + 7 * scale);
+      ctx.moveTo(wheel.x + 7 * scale, wheel.y - 7 * scale);
+      ctx.lineTo(wheel.x - 7 * scale, wheel.y + 7 * scale);
+      ctx.stroke();
       ctx.restore();
     }
     ctx.save();
     ctx.fillStyle = "#ffffff";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
     ctx.beginPath();
     ctx.moveTo(rear.x, rear.y);
     ctx.lineTo(seat.x, seat.y);
@@ -327,6 +334,14 @@ export class Renderer {
     ctx.lineTo(seat.x - 6 * scale, seat.y + 1 * scale);
     ctx.closePath();
     ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(seat.x - 2 * scale, seat.y - 8 * scale);
+    ctx.lineTo(seat.x + 10 * scale, seat.y - 8 * scale);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(front.x + 8 * scale, front.y - 23 * scale);
+    ctx.lineTo(front.x + 12 * scale, front.y - 20 * scale);
+    ctx.stroke();
     ctx.restore();
     if (!vehicle.detachedRider) {
       this.drawCharacter({
@@ -335,6 +350,7 @@ export class Renderer {
         hands,
         leftFoot: { x: rear.x + 4 * scale, y: rear.y - 1 * scale },
         rightFoot: { x: top.x + 4 * scale, y: top.y + 10 * scale },
+        lean: clamp((front.x - rear.x) * 0.01, -0.35, 0.35),
       });
       ctx.beginPath();
       ctx.moveTo(hands.x, hands.y);
@@ -353,6 +369,7 @@ export class Renderer {
     const scale = this.camera.zoom;
     ctx.save();
     ctx.fillStyle = "#ffffff";
+    ctx.lineJoin = "round";
     ctx.beginPath();
     ctx.moveTo(left.x, left.y);
     ctx.quadraticCurveTo(left.x - 12 * scale, seat.y, nose.x, nose.y);
@@ -363,6 +380,18 @@ export class Renderer {
     ctx.beginPath();
     ctx.arc((nose.x + seat.x) * 0.5, (nose.y + seat.y) * 0.5, 10 * scale, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(left.x - 3 * scale, left.y + 1 * scale);
+    ctx.lineTo(left.x - 9 * scale, left.y + 10 * scale);
+    ctx.lineTo(left.x + 2 * scale, left.y + 8 * scale);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(right.x + 3 * scale, right.y + 1 * scale);
+    ctx.lineTo(right.x + 9 * scale, right.y + 10 * scale);
+    ctx.lineTo(right.x - 2 * scale, right.y + 8 * scale);
+    ctx.closePath();
+    ctx.stroke();
     ctx.restore();
     if (!vehicle.detachedRider) {
       this.drawCharacter({
@@ -371,16 +400,18 @@ export class Renderer {
         hands: { x: seat.x + 7 * scale, y: seat.y + 6 * scale },
         leftFoot: { x: seat.x - 6 * scale, y: seat.y + 10 * scale },
         rightFoot: { x: seat.x + 6 * scale, y: seat.y + 10 * scale },
+        lean: clamp((nose.x - seat.x) * 0.012, -0.28, 0.28),
       });
     }
   }
 
-  drawCharacter({ head, torso, hands, leftFoot, rightFoot }) {
+  drawCharacter({ head, torso, hands, leftFoot, rightFoot, lean = 0 }) {
     const ctx = this.ctx;
     const scale = this.camera.zoom;
     const neck = { x: head.x, y: head.y + 6 * scale };
-    const shoulder = { x: torso.x, y: torso.y - 6 * scale };
-    const hip = { x: torso.x, y: torso.y + 4 * scale };
+    const shoulder = { x: torso.x + lean * 10 * scale, y: torso.y - 6 * scale };
+    const hip = { x: torso.x - lean * 6 * scale, y: torso.y + 4 * scale };
+    const visor = { x: head.x + 4 * scale, y: head.y + 1 * scale };
     ctx.save();
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = "#111111";
@@ -388,6 +419,14 @@ export class Renderer {
     ctx.beginPath();
     ctx.arc(head.x, head.y, 6 * scale, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(head.x - 3 * scale, head.y - 2 * scale);
+    ctx.quadraticCurveTo(head.x, head.y - 8 * scale, head.x + 5 * scale, head.y - 2 * scale);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(head.x - 3 * scale, head.y + 1 * scale);
+    ctx.quadraticCurveTo(visor.x, visor.y - 2 * scale, head.x + 5 * scale, head.y + 2 * scale);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(neck.x, neck.y);
@@ -404,6 +443,26 @@ export class Renderer {
     ctx.moveTo(hip.x, hip.y);
     ctx.lineTo(rightFoot.x, rightFoot.y);
     ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(neck.x - 2 * scale, neck.y + 1 * scale);
+    ctx.lineTo(neck.x + 6 * scale, neck.y + 6 * scale);
+    ctx.lineTo(neck.x + 1 * scale, neck.y + 6 * scale);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(hip.x - 3 * scale, hip.y);
+    ctx.lineTo(hip.x + 3 * scale, hip.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  drawGroundShadow(vehicle) {
+    const ctx = this.ctx;
+    const center = this.camera.worldToScreen(vehicle.getCenter());
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,0.06)";
+    ctx.beginPath();
+    ctx.ellipse(center.x, center.y + 20 * this.camera.zoom, 32 * this.camera.zoom, 7 * this.camera.zoom, 0, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 

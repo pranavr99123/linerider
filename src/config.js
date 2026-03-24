@@ -129,6 +129,5 @@ export const DEFAULT_TRACK = {
   powerups: [],
   checkpoints: [],
   objects: [],
-  triggerZones: [],
   gravityZones: [],
 };

@@ -31,6 +31,7 @@ export class Vehicle {
     this.teleportCooldown = 0;
     this.trails = [];
     this.detachedRider = null;
+    this.grounded = false;
   }
 
   reset(start) {

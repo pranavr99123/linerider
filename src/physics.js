@@ -26,6 +26,7 @@ export class PhysicsEngine {
     this.collisions = [];
     this.crashElapsed = 0;
     this.respawnDelay = 1.25;
+    this.grounded = false;
   }
 
   configureMode(modeKey) {
@@ -46,6 +47,7 @@ export class PhysicsEngine {
     this.lastCheckpoint = this.track.data.start;
     this.collisions = [];
     this.crashElapsed = 0;
+    this.grounded = false;
     this.replay.reset();
   }
 
@@ -95,6 +97,8 @@ export class PhysicsEngine {
         }
       }
     }
+    this.grounded = this.vehicle.points.some((point) => point.contact?.hardContact);
+    this.vehicle.grounded = this.grounded;
 
     if (this.vehicle.magnetTimer > 0) {
       const center = this.vehicle.getCenter();
@@ -119,7 +123,6 @@ export class PhysicsEngine {
     this.vehicle.updateDetachedRider(currentGravity, currentDrag, dt);
     collectPowerups(this.track, this.vehicle, this);
     this.processCheckpoints();
-    this.processTriggers();
     this.processFinish();
     this.replay.record(this.vehicle, this.runtime);
     this.status = this.completed ? "Finished" : this.vehicle.crashed ? "Crashed" : "Running";
@@ -144,7 +147,14 @@ export class PhysicsEngine {
       const style = LINE_TYPES[entry.segment.type] || LINE_TYPES.normal;
       return style.restitution < 0.5 && entry.penetration > 5;
     });
-    if (!this.vehicle.crashed && speed > this.vehicle.definition.crashSpeed && hardImpact) {
+    const violentWallStrike = this.collisions.some((entry) => {
+      const point = this.vehicle.points.find((candidate) => candidate.contact?.segmentId === entry.segment.id);
+      if (!point) return false;
+      const velocity = { x: point.x - point.prevX, y: point.y - point.prevY };
+      const impactAlongNormal = Math.abs(velocity.x * entry.normal.x + velocity.y * entry.normal.y) * 120;
+      return point.contact?.hardContact && impactAlongNormal > this.vehicle.definition.crashSpeed * 0.58;
+    });
+    if (!this.vehicle.crashed && ((speed > this.vehicle.definition.crashSpeed && hardImpact) || violentWallStrike)) {
       if (this.vehicle.shield > 0) this.vehicle.shield = 0;
       else {
         this.vehicle.crash();
@@ -181,24 +191,15 @@ export class PhysicsEngine {
     }
   }
 
-  processTriggers() {
-    const center = this.vehicle.getCenter();
-    for (const zone of this.track.data.triggerZones) {
-      if (!detectRectHit(center, zone)) continue;
-      const object = this.track.data.objects.find((item) => item.id === zone.targetId);
-      if (object) object.active = zone.activeState;
-      const gravityZone = this.track.data.gravityZones.find((item) => item.id === zone.targetId);
-      if (gravityZone) gravityZone.active = zone.activeState;
-    }
-  }
-
   respawn() {
     this.vehicle.reset(this.lastCheckpoint);
     this.vehicle.setVelocity({ x: 0, y: 0 });
     this.vehicle.crashed = false;
     this.vehicle.shield = 0;
     this.vehicle.detachedRider = null;
+    this.vehicle.grounded = false;
     this.crashElapsed = 0;
+    this.grounded = false;
     this.status = "Running";
   }
 }

@@ -5,7 +5,7 @@ Original prompt: Build an advanced 2D physics-based track builder and rider game
 - Completed: Added rider attached to vehicles, crash ejection, improved pan tool, first-run walkthrough, auto-follow on play, and removed duplicate/unused controls.
 - Completed: Teleport nodes now act as reusable portals instead of one-time pickups.
 - Completed: Gravity zones are being made more editable from the UI, and trigger tooling is being removed as redundant.
-- In progress: Tightening contact behavior so propulsion only happens on real line contact and improving vehicle/character rendering to feel less abstract.
+- In progress: Tightening contact behavior so propulsion only happens on real line contact, removing the last trigger leftovers, and improving vehicle/character rendering to feel less abstract.
 - Testing: `node --check` has been used repeatedly for syntax verification. Playwright-based validation availability is being checked via the local `develop-web-game` skill workflow.
 
 TODO / next suggestions:

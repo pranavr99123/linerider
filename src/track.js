@@ -88,7 +88,7 @@ export class TrackModel {
   }
 
   eraseNear(point, radius = 20) {
-    const before = this.data.segments.length + this.data.powerups.length + this.data.checkpoints.length + this.data.objects.length + this.data.triggerZones.length + this.data.gravityZones.length;
+    const before = this.data.segments.length + this.data.powerups.length + this.data.checkpoints.length + this.data.objects.length + this.data.gravityZones.length;
     this.data.segments = this.data.segments.filter((segment) => this.distanceToSegment(point, segment) > radius);
     this.data.powerups = this.data.powerups.filter((item) => dist(point, item) > radius);
     this.data.checkpoints = this.data.checkpoints.filter((item) => dist(point, item) > radius);
@@ -101,7 +101,6 @@ export class TrackModel {
       }
       return true;
     });
-    this.data.triggerZones = this.data.triggerZones.filter((zone) => !this.pointHitsRect(point, zone, radius));
     this.data.gravityZones = this.data.gravityZones.filter((zone) => !this.pointHitsRect(point, zone, radius));
     if (dist(point, this.data.start) <= radius) {
       this.data.start = { x: DEFAULT_TRACK.start.x, y: DEFAULT_TRACK.start.y };
@@ -112,7 +111,7 @@ export class TrackModel {
         this.data.finish = deepClone(DEFAULT_TRACK.finish);
       }
     }
-    return before !== this.data.segments.length + this.data.powerups.length + this.data.checkpoints.length + this.data.objects.length + this.data.triggerZones.length + this.data.gravityZones.length;
+    return before !== this.data.segments.length + this.data.powerups.length + this.data.checkpoints.length + this.data.objects.length + this.data.gravityZones.length;
   }
 
   findHoverSegment(point, radius = HOVER_RADIUS) {

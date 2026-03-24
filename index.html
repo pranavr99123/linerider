@@ -27,41 +27,46 @@
       <section class="panel">
         <h2>Tools</h2>
         <div class="tool-grid" id="toolButtons">
-          <button data-tool="freehand" class="active">Freehand</button>
-          <button data-tool="line">Line</button>
-          <button data-tool="curve">Curve</button>
-          <button data-tool="select">Select</button>
-          <button data-tool="pan">Pan</button>
-          <button data-tool="eraser">Eraser</button>
-          <button data-tool="start">Start</button>
-          <button data-tool="checkpoint">Checkpoint</button>
-          <button data-tool="finish">Finish</button>
-          <button data-tool="powerup">Powerup</button>
-          <button data-tool="object">Object</button>
-          <button data-tool="gravityZone">Gravity Zone</button>
+          <button data-tool="freehand" class="active" data-tooltip="Sketch a continuous track with click-drag.">Freehand</button>
+          <button data-tool="line" data-tooltip="Place a straight segment between two points.">Line</button>
+          <button data-tool="curve" data-tooltip="Click three times for a smooth curve.">Curve</button>
+          <button data-tool="select" data-tooltip="Move a line or gravity zone after placing it.">Select</button>
+          <button data-tool="pan" data-tooltip="Drag the camera around the world.">Pan</button>
+          <button data-tool="eraser" data-tooltip="Remove anything under the cursor.">Eraser</button>
+          <button data-tool="start" data-tooltip="Set the spawn point for the rider.">Start</button>
+          <button data-tool="checkpoint" data-tooltip="Place a checkpoint respawn marker.">Checkpoint</button>
+          <button data-tool="finish" data-tooltip="Draw the finish gate the rider must cross.">Finish</button>
+          <button data-tool="powerup" data-tooltip="Place collectible effects like teleport or jump.">Powerup</button>
+          <button data-tool="object" data-tooltip="Place moving platforms or rotating arms.">Object</button>
+          <button data-tool="gravityZone" data-tooltip="Draw an area with custom gravity and drag.">Gravity Zone</button>
         </div>
         <p id="toolDescription" class="tool-description"></p>
       </section>
       <section class="panel">
         <h2>Line Type</h2>
-        <select id="lineType"></select>
+        <select id="lineType" title="Choose how placed lines affect the rider."></select>
+        <p id="lineTypeDescription" class="tool-description"></p>
         <label class="toggle"><input type="checkbox" id="gridSnap"> Grid Snap</label>
         <label class="toggle"><input type="checkbox" id="endpointSnap" checked> Endpoint Snap</label>
       </section>
       <section class="panel">
         <h2>Placement</h2>
         <label>Vehicle
-          <select id="vehicleType"></select>
+          <select id="vehicleType" title="Pick the vehicle body style and handling."></select>
         </label>
+        <p id="vehicleDescription" class="tool-description"></p>
         <label>Physics Mode
-          <select id="physicsMode"></select>
+          <select id="physicsMode" title="Switch the world gravity and drag model."></select>
         </label>
+        <p id="physicsDescription" class="tool-description"></p>
         <label>Powerup Type
-          <select id="powerupType"></select>
+          <select id="powerupType" title="Choose which pickup gets placed."></select>
         </label>
+        <p id="powerupDescription" class="tool-description"></p>
         <label>Object Type
-          <select id="objectType"></select>
+          <select id="objectType" title="Choose the interactive world object to place."></select>
         </label>
+        <p id="objectDescription" class="tool-description"></p>
       </section>
       <section class="panel">
         <h2>Gravity Zone</h2>
@@ -111,13 +116,15 @@
   </div>
   <div id="walkthrough" class="walkthrough hidden">
     <div class="walkthrough-card">
-      <h2>Quick Walkthrough</h2>
-      <p>Draw tracks with `Freehand`, `Line`, or `Curve`. Use `Pan` to click-drag around the world and the mouse wheel to zoom.</p>
-      <p>Pick a line type to change how the rider behaves. `Boost`, `Brake`, `Ice`, `Bounce`, and the rest all affect physics differently.</p>
-      <p>Switch to `Play` when you want to simulate. `Pause` stops the run and `Reset` restarts from the spawn or checkpoint.</p>
-      <p>`Start`, `Checkpoint`, `Finish`, `Powerup`, and world-object tools place gameplay pieces directly into the track.</p>
-      <p>`Ctrl/Cmd+Z` undoes edits, `Select` moves a segment, and `Eraser` removes nearly anything under the cursor.</p>
+      <div class="walkthrough-progress">
+        <span id="walkthroughStepLabel">Step 1 of 5</span>
+      </div>
+      <h2 id="walkthroughTitle">Quick Walkthrough</h2>
+      <p id="walkthroughBody">Draw tracks with `Freehand`, `Line`, or `Curve`. Use `Pan` to click-drag around the world and the mouse wheel to zoom.</p>
       <div class="walkthrough-actions">
+        <button id="walkthroughUse">Use Highlighted</button>
+        <button id="walkthroughPrev">Back</button>
+        <button id="walkthroughNext">Next</button>
         <button id="walkthroughClose">Start Building</button>
       </div>
     </div>

@@ -32,6 +32,10 @@ export class Vehicle {
     this.trails = [];
     this.detachedRider = null;
     this.grounded = false;
+    this.visualState = {
+      rearWheelSpin: 0,
+      frontWheelSpin: 0,
+    };
   }
 
   reset(start) {
@@ -84,6 +88,20 @@ export class Vehicle {
         b.y -= adjust.y;
       }
     }
+  }
+
+  updateVisualState(dt) {
+    const rearWheel = this.findRolePoint("rearWheel");
+    const frontWheel = this.findRolePoint("frontWheel");
+    if (rearWheel) {
+      const rearDistance = Math.hypot(rearWheel.x - rearWheel.prevX, rearWheel.y - rearWheel.prevY);
+      this.visualState.rearWheelSpin += rearDistance / Math.max(1, rearWheel.radius) * Math.sign(this.getVelocity().x || 1);
+    }
+    if (frontWheel) {
+      const frontDistance = Math.hypot(frontWheel.x - frontWheel.prevX, frontWheel.y - frontWheel.prevY);
+      this.visualState.frontWheelSpin += frontDistance / Math.max(1, frontWheel.radius) * Math.sign(this.getVelocity().x || 1);
+    }
+    if (!dt) return;
   }
 
   crash() {

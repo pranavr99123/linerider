@@ -29,8 +29,8 @@ const LINE_TYPE_DESCRIPTIONS = {
 
 const VEHICLE_DESCRIPTIONS = {
   sled: "Closest to classic Line Rider. Stable, forgiving, and smooth on hand-drawn lines.",
-  bike: "Fast and agile, but more likely to pitch or crash on rough transitions.",
-  capsule: "Balanced and enclosed. Handles drops better than the bike with a heavier feel.",
+  bike: "Fast and agile with spinning wheels and a more demanding landing profile.",
+  capsule: "A horizontal rocket pod with an upright seated rider and a heavier, steadier feel.",
 };
 
 const PHYSICS_DESCRIPTIONS = {
@@ -204,14 +204,12 @@ export class UI {
   }
 
   showWalkthrough(force = false) {
-    if (!force && localStorage.getItem("vector-rider-lab-walkthrough-seen")) return;
     this.walkthroughIndex = 0;
     this.elements.walkthrough.classList.remove("hidden");
     this.renderWalkthrough();
   }
 
   hideWalkthrough() {
-    localStorage.setItem("vector-rider-lab-walkthrough-seen", "true");
     this.elements.walkthrough.classList.add("hidden");
     this.clearWalkthroughHighlight();
   }

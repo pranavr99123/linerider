@@ -93,6 +93,8 @@ class App {
     this.canvas.addEventListener("pointerdown", () => {
       const point = { x: this.input.pointer.worldX, y: this.input.pointer.worldY };
       if (this.editor.tool === "pan") {
+        this.camera.follow = false;
+        this.ui.elements.followCamera.checked = false;
         this.input.startPan();
       }
       if (this.input.panActive || this.editor.tool === "pan") return;
@@ -120,6 +122,8 @@ class App {
     this.state.mode = mode;
     if (mode === "play") this.play();
     else {
+      this.camera.follow = false;
+      this.ui.elements.followCamera.checked = false;
       this.pause();
       this.physics.status = "Editing";
     }

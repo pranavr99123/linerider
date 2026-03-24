@@ -118,6 +118,7 @@ export class PhysicsEngine {
 
     this.vehicle.solveConstraints(6);
     this.vehicle.updateAngle();
+    this.vehicle.updateVisualState(dt);
     this.enforceVelocityClamp();
     this.evaluateState();
     this.vehicle.updateDetachedRider(currentGravity, currentDrag, dt);

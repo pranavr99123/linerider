@@ -286,25 +286,8 @@ export class Renderer {
     const head = this.camera.worldToScreen(vehicle.points[4]);
     const hands = this.camera.worldToScreen(vehicle.points[5]);
     const scale = this.camera.zoom;
-    for (const wheel of [rear, front]) {
-      ctx.save();
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.arc(wheel.x, wheel.y, 10 * this.camera.zoom, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(wheel.x - 10 * scale, wheel.y);
-      ctx.lineTo(wheel.x + 10 * scale, wheel.y);
-      ctx.moveTo(wheel.x, wheel.y - 10 * scale);
-      ctx.lineTo(wheel.x, wheel.y + 10 * scale);
-      ctx.moveTo(wheel.x - 7 * scale, wheel.y - 7 * scale);
-      ctx.lineTo(wheel.x + 7 * scale, wheel.y + 7 * scale);
-      ctx.moveTo(wheel.x + 7 * scale, wheel.y - 7 * scale);
-      ctx.lineTo(wheel.x - 7 * scale, wheel.y + 7 * scale);
-      ctx.stroke();
-      ctx.restore();
-    }
+    this.drawWheel(rear, 10 * scale, vehicle.visualState?.rearWheelSpin || 0);
+    this.drawWheel(front, 10 * scale, vehicle.visualState?.frontWheelSpin || 0);
     ctx.save();
     ctx.fillStyle = "#ffffff";
     ctx.lineJoin = "round";
@@ -344,13 +327,13 @@ export class Renderer {
     ctx.stroke();
     ctx.restore();
     if (!vehicle.detachedRider) {
-      this.drawCharacter({
-        head,
+      this.drawSeatedRider({
         torso: seat,
+        head,
         hands,
         leftFoot: { x: rear.x + 4 * scale, y: rear.y - 1 * scale },
         rightFoot: { x: top.x + 4 * scale, y: top.y + 10 * scale },
-        lean: clamp((front.x - rear.x) * 0.01, -0.35, 0.35),
+        lean: clamp((front.x - rear.x) * 0.006, -0.16, 0.16),
       });
       ctx.beginPath();
       ctx.moveTo(hands.x, hands.y);
@@ -361,72 +344,115 @@ export class Renderer {
 
   drawCapsule(vehicle) {
     const ctx = this.ctx;
-    const left = this.camera.worldToScreen(vehicle.points[0]);
-    const right = this.camera.worldToScreen(vehicle.points[1]);
+    const tailTop = this.camera.worldToScreen(vehicle.points[0]);
+    const tailBottom = this.camera.worldToScreen(vehicle.points[1]);
     const nose = this.camera.worldToScreen(vehicle.points[2]);
     const seat = this.camera.worldToScreen(vehicle.points[3]);
     const head = this.camera.worldToScreen(vehicle.points[4]);
     const scale = this.camera.zoom;
+    const bodyMidY = (tailTop.y + tailBottom.y) * 0.5;
     ctx.save();
     ctx.fillStyle = "#ffffff";
     ctx.lineJoin = "round";
     ctx.beginPath();
-    ctx.moveTo(left.x, left.y);
-    ctx.quadraticCurveTo(left.x - 12 * scale, seat.y, nose.x, nose.y);
-    ctx.quadraticCurveTo(right.x + 12 * scale, seat.y, right.x, right.y);
+    ctx.moveTo(tailTop.x, tailTop.y);
+    ctx.quadraticCurveTo(nose.x - 8 * scale, tailTop.y - 12 * scale, nose.x, nose.y);
+    ctx.quadraticCurveTo(nose.x - 8 * scale, tailBottom.y + 12 * scale, tailBottom.x, tailBottom.y);
+    ctx.lineTo(tailTop.x, tailTop.y);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc((nose.x + seat.x) * 0.5, (nose.y + seat.y) * 0.5, 10 * scale, 0, Math.PI * 2);
+    ctx.ellipse(seat.x + 5 * scale, bodyMidY, 10 * scale, 12 * scale, 0, 0, Math.PI * 2);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(left.x - 3 * scale, left.y + 1 * scale);
-    ctx.lineTo(left.x - 9 * scale, left.y + 10 * scale);
-    ctx.lineTo(left.x + 2 * scale, left.y + 8 * scale);
+    ctx.moveTo(tailTop.x - 3 * scale, tailTop.y + 1 * scale);
+    ctx.lineTo(tailTop.x - 15 * scale, tailTop.y - 3 * scale);
+    ctx.lineTo(tailTop.x - 6 * scale, tailTop.y + 7 * scale);
     ctx.closePath();
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(right.x + 3 * scale, right.y + 1 * scale);
-    ctx.lineTo(right.x + 9 * scale, right.y + 10 * scale);
-    ctx.lineTo(right.x - 2 * scale, right.y + 8 * scale);
+    ctx.moveTo(tailBottom.x - 3 * scale, tailBottom.y - 1 * scale);
+    ctx.lineTo(tailBottom.x - 15 * scale, tailBottom.y + 3 * scale);
+    ctx.lineTo(tailBottom.x - 6 * scale, tailBottom.y - 7 * scale);
     ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(nose.x - 4 * scale, nose.y);
+    ctx.lineTo(nose.x + 8 * scale, nose.y);
     ctx.stroke();
     ctx.restore();
     if (!vehicle.detachedRider) {
-      this.drawCharacter({
-        head,
+      this.drawSeatedRider({
         torso: seat,
-        hands: { x: seat.x + 7 * scale, y: seat.y + 6 * scale },
-        leftFoot: { x: seat.x - 6 * scale, y: seat.y + 10 * scale },
-        rightFoot: { x: seat.x + 6 * scale, y: seat.y + 10 * scale },
-        lean: clamp((nose.x - seat.x) * 0.012, -0.28, 0.28),
+        head: { x: seat.x, y: seat.y - 16 * scale },
+        hands: { x: seat.x + 9 * scale, y: seat.y - 2 * scale },
+        leftFoot: { x: seat.x - 5 * scale, y: seat.y + 10 * scale },
+        rightFoot: { x: seat.x + 5 * scale, y: seat.y + 10 * scale },
+        lean: 0,
       });
     }
   }
 
-  drawCharacter({ head, torso, hands, leftFoot, rightFoot, lean = 0 }) {
+  drawWheel(center, radius, spin) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.translate(center.x, center.y);
+    ctx.rotate(spin);
+    ctx.beginPath();
+    for (let i = 0; i < 4; i += 1) {
+      const angle = i * (Math.PI / 2);
+      ctx.moveTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+      ctx.lineTo(Math.cos(angle + Math.PI) * radius, Math.sin(angle + Math.PI) * radius);
+      ctx.moveTo(Math.cos(angle + Math.PI / 4) * radius * 0.72, Math.sin(angle + Math.PI / 4) * radius * 0.72);
+      ctx.lineTo(Math.cos(angle + Math.PI + Math.PI / 4) * radius * 0.72, Math.sin(angle + Math.PI + Math.PI / 4) * radius * 0.72);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  drawSeatedRider({ torso, head, hands, leftFoot, rightFoot, lean = 0 }) {
+    const scale = this.camera.zoom;
+    const uprightHead = { x: torso.x + lean * 6 * scale, y: torso.y - 22 * scale };
+    this.drawCharacter({
+      head: head || uprightHead,
+      torso,
+      hands,
+      leftFoot,
+      rightFoot,
+      lean,
+      upright: true,
+    });
+  }
+
+  drawCharacter({ head, torso, hands, leftFoot, rightFoot, lean = 0, upright = false }) {
     const ctx = this.ctx;
     const scale = this.camera.zoom;
-    const neck = { x: head.x, y: head.y + 6 * scale };
-    const shoulder = { x: torso.x + lean * 10 * scale, y: torso.y - 6 * scale };
-    const hip = { x: torso.x - lean * 6 * scale, y: torso.y + 4 * scale };
-    const visor = { x: head.x + 4 * scale, y: head.y + 1 * scale };
+    const renderedHead = upright ? { x: torso.x + lean * 6 * scale, y: torso.y - 22 * scale } : head;
+    const neck = { x: renderedHead.x, y: renderedHead.y + 6 * scale };
+    const shoulder = { x: torso.x + lean * 8 * scale, y: torso.y - 6 * scale };
+    const hip = { x: torso.x - lean * 3 * scale, y: torso.y + 4 * scale };
+    const visor = { x: renderedHead.x + 4 * scale, y: renderedHead.y + 1 * scale };
     ctx.save();
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = "#111111";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(head.x, head.y, 6 * scale, 0, Math.PI * 2);
+    ctx.arc(renderedHead.x, renderedHead.y, 6 * scale, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(head.x - 3 * scale, head.y - 2 * scale);
-    ctx.quadraticCurveTo(head.x, head.y - 8 * scale, head.x + 5 * scale, head.y - 2 * scale);
+    ctx.moveTo(renderedHead.x - 3 * scale, renderedHead.y - 2 * scale);
+    ctx.quadraticCurveTo(renderedHead.x, renderedHead.y - 8 * scale, renderedHead.x + 5 * scale, renderedHead.y - 2 * scale);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(head.x - 3 * scale, head.y + 1 * scale);
-    ctx.quadraticCurveTo(visor.x, visor.y - 2 * scale, head.x + 5 * scale, head.y + 2 * scale);
+    ctx.moveTo(renderedHead.x - 3 * scale, renderedHead.y + 1 * scale);
+    ctx.quadraticCurveTo(visor.x, visor.y - 2 * scale, renderedHead.x + 5 * scale, renderedHead.y + 2 * scale);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(neck.x, neck.y);

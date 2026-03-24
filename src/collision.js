@@ -36,7 +36,7 @@ export function resolvePointVsSegments(point, segments, vehicleTraction) {
     }
     const delta = sub(point, projection.point);
     const distance = len(delta);
-    if (distance > point.radius + 2) continue;
+    if (distance > point.radius + 0.5) continue;
     if (distance > 0.001) normal = scale(delta, 1 / distance);
     const style = LINE_TYPES[segment.type] || LINE_TYPES.normal;
     const velocity = { x: point.x - point.prevX, y: point.y - point.prevY };
@@ -52,14 +52,18 @@ export function resolvePointVsSegments(point, segments, vehicleTraction) {
   point.y += best.normal.y * (best.penetration + 0.4);
   const velocity = { x: point.x - point.prevX, y: point.y - point.prevY };
   const components = projectVelocity(velocity, best.tangent, best.normal);
-  let tangentVel = components.tangent * best.style.friction * vehicleTraction;
-  tangentVel += (best.style.tangentAccel + best.style.conveyor) / 120;
+  const hardContact = best.penetration >= 0.15;
+  let tangentVel = components.tangent;
+  if (hardContact) {
+    tangentVel *= best.style.friction * vehicleTraction;
+    tangentVel += (best.style.tangentAccel + best.style.conveyor) / 120;
+  }
   let normalVel = components.normal;
   if (normalVel > 0) normalVel = -normalVel * best.style.restitution;
   const newVelocity = { x: best.tangent.x * tangentVel + best.normal.x * normalVel, y: best.tangent.y * tangentVel + best.normal.y * normalVel };
   point.prevX = point.x - newVelocity.x;
   point.prevY = point.y - newVelocity.y;
-  point.contact = { point: best.projection, tangent: best.tangent, normal: best.normal, segmentId: best.segment.id, segmentType: best.segment.type };
+  point.contact = { point: best.projection, tangent: best.tangent, normal: best.normal, segmentId: best.segment.id, segmentType: best.segment.type, hardContact };
   return best;
 }
 

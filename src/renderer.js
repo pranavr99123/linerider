@@ -254,17 +254,31 @@ export class Renderer {
     const front = this.camera.worldToScreen(vehicle.points[1]);
     const seat = this.camera.worldToScreen(vehicle.points[2]);
     const head = this.camera.worldToScreen(vehicle.points[3]);
+    const scale = this.camera.zoom;
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
     ctx.beginPath();
     ctx.moveTo(rear.x, rear.y);
-    ctx.quadraticCurveTo((rear.x + front.x) * 0.5, rear.y - 8, front.x, front.y);
+    ctx.quadraticCurveTo((rear.x + front.x) * 0.5, rear.y - 9 * scale, front.x, front.y);
+    ctx.lineTo(front.x - 3 * scale, front.y - 7 * scale);
+    ctx.quadraticCurveTo((rear.x + front.x) * 0.5, rear.y - 18 * scale, rear.x + 2 * scale, rear.y - 6 * scale);
+    ctx.closePath();
+    ctx.fill();
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(seat.x, seat.y);
-    ctx.lineTo(rear.x + 7, rear.y - 10);
-    ctx.lineTo(front.x - 8, front.y - 11);
+    ctx.lineTo(rear.x + 7 * scale, rear.y - 10 * scale);
+    ctx.lineTo(front.x - 8 * scale, front.y - 11 * scale);
     ctx.stroke();
+    ctx.restore();
     if (!vehicle.detachedRider) {
-      this.drawStickRider(seat, head, front);
+      this.drawCharacter({
+        head,
+        torso: seat,
+        hands: { x: front.x - 3 * scale, y: front.y - 10 * scale },
+        leftFoot: { x: seat.x - 8 * scale, y: seat.y + 14 * scale },
+        rightFoot: { x: seat.x + 4 * scale, y: seat.y + 14 * scale },
+      });
     }
   }
 
@@ -276,11 +290,18 @@ export class Renderer {
     const seat = this.camera.worldToScreen(vehicle.points[3]);
     const head = this.camera.worldToScreen(vehicle.points[4]);
     const hands = this.camera.worldToScreen(vehicle.points[5]);
+    const scale = this.camera.zoom;
     for (const wheel of [rear, front]) {
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
       ctx.beginPath();
       ctx.arc(wheel.x, wheel.y, 10 * this.camera.zoom, 0, Math.PI * 2);
+      ctx.fill();
       ctx.stroke();
+      ctx.restore();
     }
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
     ctx.beginPath();
     ctx.moveTo(rear.x, rear.y);
     ctx.lineTo(seat.x, seat.y);
@@ -289,18 +310,35 @@ export class Renderer {
     ctx.lineTo(seat.x, seat.y);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(front.x - 6 * this.camera.zoom, front.y - 18 * this.camera.zoom);
-    ctx.lineTo(front.x + 10 * this.camera.zoom, front.y - 28 * this.camera.zoom);
+    ctx.moveTo(front.x - 6 * scale, front.y - 18 * scale);
+    ctx.lineTo(front.x + 10 * scale, front.y - 28 * scale);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(top.x, top.y);
-    ctx.lineTo(front.x - 6 * this.camera.zoom, front.y - 18 * this.camera.zoom);
+    ctx.lineTo(front.x - 6 * scale, front.y - 18 * scale);
     ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(rear.x - 3 * scale, rear.y - 3 * scale);
+    ctx.lineTo(seat.x + 6 * scale, seat.y - 2 * scale);
+    ctx.lineTo(top.x + 2 * scale, top.y - 4 * scale);
+    ctx.lineTo(front.x - 2 * scale, front.y - 2 * scale);
+    ctx.lineTo(front.x - 7 * scale, front.y + 2 * scale);
+    ctx.lineTo(top.x - 2 * scale, top.y + 2 * scale);
+    ctx.lineTo(seat.x - 6 * scale, seat.y + 1 * scale);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
     if (!vehicle.detachedRider) {
-      this.drawStickRider(seat, head, hands);
+      this.drawCharacter({
+        head,
+        torso: seat,
+        hands,
+        leftFoot: { x: rear.x + 4 * scale, y: rear.y - 1 * scale },
+        rightFoot: { x: top.x + 4 * scale, y: top.y + 10 * scale },
+      });
       ctx.beginPath();
       ctx.moveTo(hands.x, hands.y);
-      ctx.lineTo(front.x + 8 * this.camera.zoom, front.y - 24 * this.camera.zoom);
+      ctx.lineTo(front.x + 8 * scale, front.y - 24 * scale);
       ctx.stroke();
     }
   }
@@ -312,59 +350,77 @@ export class Renderer {
     const nose = this.camera.worldToScreen(vehicle.points[2]);
     const seat = this.camera.worldToScreen(vehicle.points[3]);
     const head = this.camera.worldToScreen(vehicle.points[4]);
+    const scale = this.camera.zoom;
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
     ctx.beginPath();
     ctx.moveTo(left.x, left.y);
-    ctx.quadraticCurveTo(left.x - 12 * this.camera.zoom, seat.y, nose.x, nose.y);
-    ctx.quadraticCurveTo(right.x + 12 * this.camera.zoom, seat.y, right.x, right.y);
+    ctx.quadraticCurveTo(left.x - 12 * scale, seat.y, nose.x, nose.y);
+    ctx.quadraticCurveTo(right.x + 12 * scale, seat.y, right.x, right.y);
     ctx.closePath();
+    ctx.fill();
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc((nose.x + seat.x) * 0.5, (nose.y + seat.y) * 0.5, 10 * this.camera.zoom, 0, Math.PI * 2);
+    ctx.arc((nose.x + seat.x) * 0.5, (nose.y + seat.y) * 0.5, 10 * scale, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.restore();
     if (!vehicle.detachedRider) {
-      this.drawStickRider(seat, head, { x: seat.x + 8 * this.camera.zoom, y: seat.y + 8 * this.camera.zoom });
+      this.drawCharacter({
+        head,
+        torso: seat,
+        hands: { x: seat.x + 7 * scale, y: seat.y + 6 * scale },
+        leftFoot: { x: seat.x - 6 * scale, y: seat.y + 10 * scale },
+        rightFoot: { x: seat.x + 6 * scale, y: seat.y + 10 * scale },
+      });
     }
   }
 
-  drawStickRider(seat, head, hands) {
+  drawCharacter({ head, torso, hands, leftFoot, rightFoot }) {
     const ctx = this.ctx;
-    const neck = { x: head.x, y: head.y + 6 * this.camera.zoom };
-    const torso = { x: seat.x, y: seat.y - 4 * this.camera.zoom };
-    ctx.beginPath();
-    ctx.arc(head.x, head.y, 6 * this.camera.zoom, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(neck.x, neck.y);
-    ctx.lineTo(torso.x, torso.y);
-    ctx.lineTo(seat.x, seat.y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(torso.x, torso.y + 4 * this.camera.zoom);
-    ctx.lineTo(hands.x, hands.y);
-    ctx.moveTo(seat.x, seat.y);
-    ctx.lineTo(seat.x - 8 * this.camera.zoom, seat.y + 14 * this.camera.zoom);
-    ctx.moveTo(seat.x, seat.y);
-    ctx.lineTo(seat.x + 6 * this.camera.zoom, seat.y + 14 * this.camera.zoom);
-    ctx.stroke();
-  }
-
-  drawDetachedRider(detachedRider) {
-    const ctx = this.ctx;
-    const [head, torso, hands, leftFoot, rightFoot] = detachedRider.points.map((point) => this.camera.worldToScreen(point));
+    const scale = this.camera.zoom;
+    const neck = { x: head.x, y: head.y + 6 * scale };
+    const shoulder = { x: torso.x, y: torso.y - 6 * scale };
+    const hip = { x: torso.x, y: torso.y + 4 * scale };
     ctx.save();
+    ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = "#111111";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(head.x, head.y, 6 * this.camera.zoom, 0, Math.PI * 2);
+    ctx.arc(head.x, head.y, 6 * scale, 0, Math.PI * 2);
+    ctx.fill();
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(head.x, head.y + 6 * this.camera.zoom);
-    ctx.lineTo(torso.x, torso.y);
+    ctx.moveTo(neck.x, neck.y);
+    ctx.quadraticCurveTo(shoulder.x - 5 * scale, shoulder.y + 2 * scale, hip.x, hip.y);
+    ctx.quadraticCurveTo(shoulder.x + 5 * scale, shoulder.y + 2 * scale, neck.x, neck.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(shoulder.x, shoulder.y + 2 * scale);
+    ctx.lineTo(hands.x, hands.y);
+    ctx.moveTo(hip.x, hip.y);
+    ctx.lineTo(leftFoot.x, leftFoot.y);
+    ctx.moveTo(hip.x, hip.y);
+    ctx.lineTo(rightFoot.x, rightFoot.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  drawDetachedRider(detachedRider) {
+    const [head, torso, hands, leftFoot, rightFoot] = detachedRider.points.map((point) => this.camera.worldToScreen(point));
+    this.drawCharacter({ head, torso, hands, leftFoot, rightFoot });
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.strokeStyle = "#111111";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(torso.x, torso.y);
+    ctx.lineTo(hands.x, hands.y);
+    ctx.moveTo(torso.x, torso.y);
     ctx.lineTo(leftFoot.x, leftFoot.y);
     ctx.moveTo(torso.x, torso.y);
     ctx.lineTo(rightFoot.x, rightFoot.y);
-    ctx.moveTo(torso.x, torso.y - 1 * this.camera.zoom);
-    ctx.lineTo(hands.x, hands.y);
     ctx.stroke();
     ctx.restore();
   }

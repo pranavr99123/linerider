@@ -1,0 +1,199 @@
+:root {
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --panel-border: rgba(0, 0, 0, 0.12);
+  --text: #111111;
+  --muted: #555555;
+  --accent: #111111;
+  --accent-2: #222222;
+  --danger: #000000;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+  color: var(--text);
+  background: #ffffff;
+}
+
+button,
+select,
+textarea,
+input {
+  font: inherit;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  height: 100%;
+}
+
+.sidebar {
+  overflow-y: auto;
+  padding: 18px;
+  background: #ffffff;
+  border-right: 1px solid var(--panel-border);
+}
+
+.brand h1 {
+  margin: 0 0 4px;
+  font-size: 1.85rem;
+  letter-spacing: 0.04em;
+}
+
+.brand p {
+  margin: 0 0 18px;
+  color: var(--muted);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 0.98rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.button-row,
+.tool-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.button-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.button-row.compact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.tool-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+button,
+select,
+textarea {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: #ffffff;
+  color: var(--text);
+}
+
+button {
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+button:hover,
+button.active {
+  background: #f1f1f1;
+  border-color: rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+select,
+textarea,
+input[type="range"] {
+  margin-top: 6px;
+  padding: 10px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.toggle input {
+  margin: 0;
+}
+
+.stats {
+  display: grid;
+  gap: 8px;
+}
+
+.stats div {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #f7f7f7;
+  border-radius: 6px;
+}
+
+.stats span {
+  color: var(--muted);
+}
+
+textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.shortcuts p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.stage-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #ffffff;
+}
+
+@media (max-width: 1100px) {
+  #app {
+    grid-template-columns: 320px 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  #app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .sidebar {
+    max-height: 45vh;
+    border-right: 0;
+    border-bottom: 1px solid var(--panel-border);
+  }
+}

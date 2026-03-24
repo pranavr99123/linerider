@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vector Rider Lab</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>Vector Rider Lab</h1>
+        <p>Track builder, physics sandbox, and arcade rider.</p>
+      </div>
+      <section class="panel">
+        <h2>Mode</h2>
+        <div class="button-row">
+          <button data-mode="edit" class="active">Edit</button>
+          <button data-mode="play">Play</button>
+        </div>
+        <div class="button-row compact">
+          <button id="playToggle">Play</button>
+          <button id="pauseBtn">Pause</button>
+          <button id="resetBtn">Reset</button>
+          <button id="stepBtn">Step</button>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Tools</h2>
+        <div class="tool-grid" id="toolButtons">
+          <button data-tool="freehand" class="active">Freehand</button>
+          <button data-tool="line">Line</button>
+          <button data-tool="curve">Curve</button>
+          <button data-tool="select">Select</button>
+          <button data-tool="eraser">Eraser</button>
+          <button data-tool="start">Start</button>
+          <button data-tool="checkpoint">Checkpoint</button>
+          <button data-tool="finish">Finish</button>
+          <button data-tool="powerup">Powerup</button>
+          <button data-tool="object">Object</button>
+          <button data-tool="trigger">Trigger</button>
+          <button data-tool="gravityZone">Gravity Zone</button>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Line Type</h2>
+        <select id="lineType"></select>
+        <label class="toggle"><input type="checkbox" id="gridSnap"> Grid Snap</label>
+        <label class="toggle"><input type="checkbox" id="endpointSnap" checked> Endpoint Snap</label>
+      </section>
+      <section class="panel">
+        <h2>Placement</h2>
+        <label>Vehicle
+          <select id="vehicleType"></select>
+        </label>
+        <label>Physics Mode
+          <select id="physicsMode"></select>
+        </label>
+        <label>Powerup Type
+          <select id="powerupType"></select>
+        </label>
+        <label>Object Type
+          <select id="objectType"></select>
+        </label>
+      </section>
+      <section class="panel">
+        <h2>Run</h2>
+        <div class="stats">
+          <div><span>Timer</span><strong id="timerLabel">0.00s</strong></div>
+          <div><span>Checkpoint</span><strong id="checkpointLabel">0 / 0</strong></div>
+          <div><span>Status</span><strong id="statusLabel">Editing</strong></div>
+        </div>
+        <label>Replay Scrub
+          <input id="timelineSlider" type="range" min="0" max="0" value="0">
+        </label>
+        <label class="toggle"><input type="checkbox" id="followCamera"> Follow Rider</label>
+        <label class="toggle"><input type="checkbox" id="motionTrails"> Motion Trails</label>
+        <label class="toggle"><input type="checkbox" id="debugOverlay"> Debug Overlay</label>
+      </section>
+      <section class="panel">
+        <h2>Save / Load</h2>
+        <div class="button-row compact">
+          <button id="saveBtn">Export JSON</button>
+          <button id="loadBtn">Load JSON</button>
+          <button id="sampleBtn">Sample Track</button>
+        </div>
+        <textarea id="saveData" spellcheck="false" placeholder="Track JSON appears here..."></textarea>
+      </section>
+      <section class="panel shortcuts">
+        <h2>Shortcuts</h2>
+        <p>`1-5` tools, `Ctrl/Cmd+Z` undo, `Shift+Ctrl/Cmd+Z` redo, `Space` play pause, `R` reset, `F` follow, `G` grid, `D` debug.</p>
+      </section>
+    </aside>
+    <main class="stage-wrap">
+      <canvas id="gameCanvas" width="1600" height="900"></canvas>
+    </main>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

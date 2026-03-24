@@ -41,6 +41,7 @@ class App {
     window.addEventListener("resize", () => this.onResize());
     this.syncUiState();
     this.resetRun();
+    this.ui.showWalkthrough();
     requestAnimationFrame((time) => this.loop(time));
   }
 
@@ -83,18 +84,19 @@ class App {
       if (event.code === "Digit2") this.setTool("line");
       if (event.code === "Digit3") this.setTool("curve");
       if (event.code === "Digit4") this.setTool("select");
-      if (event.code === "Digit5") this.setTool("eraser");
+      if (event.code === "Digit5") this.setTool("pan");
+      if (event.code === "Digit6") this.setTool("eraser");
     });
   }
 
   attachCanvasHandlers() {
     this.canvas.addEventListener("pointerdown", () => {
       const point = { x: this.input.pointer.worldX, y: this.input.pointer.worldY };
-      if (this.input.panActive) return;
+      if (this.input.panActive || this.editor.tool === "pan") return;
       if (this.state.mode === "edit") this.editor.begin(point, this.state);
     });
     this.canvas.addEventListener("pointermove", () => {
-      if (this.input.pointer.down && this.input.panActive) {
+      if (this.input.pointer.down && (this.input.panActive || this.editor.tool === "pan")) {
         this.camera.pan(this.input.pointer.x - this.input.prevPointer.x, this.input.pointer.y - this.input.prevPointer.y);
         return;
       }
@@ -104,7 +106,7 @@ class App {
     });
     this.canvas.addEventListener("pointerup", () => {
       const point = { x: this.input.pointer.worldX, y: this.input.pointer.worldY };
-      if (this.state.mode === "edit" && !this.input.panActive) this.editor.end(point, this.state);
+      if (this.state.mode === "edit" && !this.input.panActive && this.editor.tool !== "pan") this.editor.end(point, this.state);
     });
   }
 

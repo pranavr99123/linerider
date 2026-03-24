@@ -21,13 +21,15 @@ export class UI {
       physicsMode: document.getElementById("physicsMode"),
       powerupType: document.getElementById("powerupType"),
       objectType: document.getElementById("objectType"),
-      playToggle: document.getElementById("playToggle"),
       pauseBtn: document.getElementById("pauseBtn"),
       resetBtn: document.getElementById("resetBtn"),
       stepBtn: document.getElementById("stepBtn"),
       saveBtn: document.getElementById("saveBtn"),
       loadBtn: document.getElementById("loadBtn"),
       sampleBtn: document.getElementById("sampleBtn"),
+      walkthroughBtn: document.getElementById("walkthroughBtn"),
+      walkthrough: document.getElementById("walkthrough"),
+      walkthroughClose: document.getElementById("walkthroughClose"),
       saveData: document.getElementById("saveData"),
       gridSnap: document.getElementById("gridSnap"),
       endpointSnap: document.getElementById("endpointSnap"),
@@ -69,14 +71,25 @@ export class UI {
     this.elements.followCamera.addEventListener("change", () => { this.app.camera.follow = this.elements.followCamera.checked; });
     this.elements.debugOverlay.addEventListener("change", () => { this.app.state.debugOverlay = this.elements.debugOverlay.checked; });
     this.elements.motionTrails.addEventListener("change", () => { this.app.state.motionTrails = this.elements.motionTrails.checked; });
-    this.elements.playToggle.addEventListener("click", () => this.app.play());
     this.elements.pauseBtn.addEventListener("click", () => this.app.pause());
     this.elements.resetBtn.addEventListener("click", () => this.app.resetRun());
     this.elements.stepBtn.addEventListener("click", () => this.app.stepFrame());
     this.elements.saveBtn.addEventListener("click", () => this.app.exportTrack());
     this.elements.loadBtn.addEventListener("click", () => this.app.importTrack());
     this.elements.sampleBtn.addEventListener("click", () => this.app.loadSampleTrack());
+    this.elements.walkthroughBtn.addEventListener("click", () => this.showWalkthrough(true));
+    this.elements.walkthroughClose.addEventListener("click", () => this.hideWalkthrough());
     this.elements.timelineSlider.addEventListener("input", () => this.app.scrubReplay(Number(this.elements.timelineSlider.value)));
+  }
+
+  showWalkthrough(force = false) {
+    if (!force && localStorage.getItem("vector-rider-lab-walkthrough-seen")) return;
+    this.elements.walkthrough.classList.remove("hidden");
+  }
+
+  hideWalkthrough() {
+    localStorage.setItem("vector-rider-lab-walkthrough-seen", "true");
+    this.elements.walkthrough.classList.add("hidden");
   }
 
   refresh() {

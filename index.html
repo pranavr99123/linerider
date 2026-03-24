@@ -20,7 +20,6 @@
           <button data-mode="play">Play</button>
         </div>
         <div class="button-row compact">
-          <button id="playToggle">Play</button>
           <button id="pauseBtn">Pause</button>
           <button id="resetBtn">Reset</button>
           <button id="stepBtn">Step</button>
@@ -33,6 +32,7 @@
           <button data-tool="line">Line</button>
           <button data-tool="curve">Curve</button>
           <button data-tool="select">Select</button>
+          <button data-tool="pan">Pan</button>
           <button data-tool="eraser">Eraser</button>
           <button data-tool="start">Start</button>
           <button data-tool="checkpoint">Checkpoint</button>
@@ -89,12 +89,26 @@
       </section>
       <section class="panel shortcuts">
         <h2>Shortcuts</h2>
-        <p>`1-5` tools, `Ctrl/Cmd+Z` undo, `Shift+Ctrl/Cmd+Z` redo, `Space` play pause, `R` reset, `F` follow, `G` grid, `D` debug.</p>
+        <p>`1-6` tools, `Ctrl/Cmd+Z` undo, `Shift+Ctrl/Cmd+Z` redo, `Space` play pause, `R` reset, `F` follow, `G` grid, `D` debug.</p>
+        <button id="walkthroughBtn">Show Walkthrough</button>
       </section>
     </aside>
     <main class="stage-wrap">
       <canvas id="gameCanvas" width="1600" height="900"></canvas>
     </main>
+  </div>
+  <div id="walkthrough" class="walkthrough hidden">
+    <div class="walkthrough-card">
+      <h2>Quick Walkthrough</h2>
+      <p>Draw tracks with `Freehand`, `Line`, or `Curve`. Use `Pan` to click-drag around the world and the mouse wheel to zoom.</p>
+      <p>Pick a line type to change how the rider behaves. `Boost`, `Brake`, `Ice`, `Bounce`, and the rest all affect physics differently.</p>
+      <p>Switch to `Play` when you want to simulate. `Pause`, `Reset`, and `Step` are for inspection and debugging.</p>
+      <p>`Start`, `Checkpoint`, `Finish`, `Powerup`, and world-object tools place gameplay pieces directly into the track.</p>
+      <p>`Ctrl/Cmd+Z` undoes edits, `Select` moves a segment, and `Eraser` removes nearly anything under the cursor.</p>
+      <div class="walkthrough-actions">
+        <button id="walkthroughClose">Start Building</button>
+      </div>
+    </div>
   </div>
   <script type="module" src="./src/main.js"></script>
 </body>

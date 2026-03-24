@@ -83,7 +83,7 @@ input {
 }
 
 .button-row.compact {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 8px;
 }
 
@@ -167,6 +167,10 @@ textarea {
   line-height: 1.5;
 }
 
+.shortcuts button {
+  margin-top: 10px;
+}
+
 .stage-wrap {
   position: relative;
   overflow: hidden;
@@ -177,6 +181,43 @@ textarea {
   height: 100%;
   display: block;
   background: #ffffff;
+}
+
+.walkthrough {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 24px;
+}
+
+.walkthrough.hidden {
+  display: none;
+}
+
+.walkthrough-card {
+  width: min(560px, 100%);
+  background: #ffffff;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.walkthrough-card h2 {
+  margin-top: 0;
+}
+
+.walkthrough-card p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.walkthrough-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 @media (max-width: 1100px) {

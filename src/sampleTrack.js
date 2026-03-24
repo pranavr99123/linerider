@@ -1,0 +1,32 @@
+export const SAMPLE_TRACK = {
+  settings: { physicsMode: "earth", vehicleType: "bike", gridSnap: false, endpointSnap: true },
+  start: { x: 100, y: -40 },
+  finish: { x1: 2840, y1: 10, x2: 2840, y2: -240 },
+  segments: [
+    { id: "s1", x1: -80, y1: 100, x2: 300, y2: 40, type: "normal", active: true },
+    { id: "s2", x1: 300, y1: 40, x2: 580, y2: -40, type: "boost", active: true },
+    { id: "s3", x1: 580, y1: -40, x2: 860, y2: -30, type: "ice", active: true },
+    { id: "s4", x1: 860, y1: -30, x2: 1170, y2: 60, type: "normal", active: true },
+    { id: "s5", x1: 1170, y1: 60, x2: 1380, y2: 40, type: "brake", active: true },
+    { id: "s6", x1: 1380, y1: 40, x2: 1620, y2: -70, type: "conveyor", active: true },
+    { id: "s7", x1: 1620, y1: -70, x2: 1820, y2: -10, type: "sticky", active: true },
+    { id: "s8", x1: 1820, y1: -10, x2: 2020, y2: 120, type: "bounce", active: true },
+    { id: "s9", x1: 2020, y1: 120, x2: 2280, y2: 70, type: "breakable", active: true },
+    { id: "s10", x1: 2280, y1: 70, x2: 2600, y2: -40, type: "oneway", active: true },
+    { id: "s11", x1: 2600, y1: -40, x2: 2860, y2: -20, type: "normal", active: true },
+  ],
+  powerups: [
+    { id: "p1", type: "speed", x: 620, y: -90, active: true },
+    { id: "p2", type: "jump", x: 1440, y: 0, active: true },
+    { id: "p3", type: "shield", x: 1880, y: -60, active: true },
+    { id: "p4", type: "teleport", x: 2130, y: 80, active: true, pairId: "tp1" },
+    { id: "p5", type: "teleport", x: 2470, y: -120, active: true, pairId: "tp1" },
+  ],
+  checkpoints: [{ id: "c1", x: 960, y: -120 }, { id: "c2", x: 2120, y: 10 }],
+  objects: [
+    { id: "o1", type: "movingPlatform", x1: 930, y1: -220, x2: 1110, y2: -220, offsetX: 140, offsetY: 0, speed: 0.9, phase: 0, active: true },
+    { id: "o2", type: "rotatingArm", centerX: 1710, centerY: -200, length: 90, speed: 1.5, phase: 0.2, active: true },
+  ],
+  triggerZones: [{ id: "t1", x: 730, y: -180, width: 90, height: 90, targetId: "o1", activeState: false }],
+  gravityZones: [{ id: "g1", x: 2320, y: -340, width: 260, height: 240, gravity: { x: 0, y: -750 }, drag: 0.0002, active: true }],
+};

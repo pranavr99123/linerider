@@ -102,7 +102,10 @@ class App {
       }
       const point = { x: this.input.pointer.worldX, y: this.input.pointer.worldY };
       if (this.state.mode === "edit" && this.input.pointer.down) this.editor.move(point, this.state);
-      else this.track.findHoverSegment(point, 18);
+      else {
+        this.track.findHoverSegment(point, 18);
+        this.track.findHoverGravityZone(point);
+      }
     });
     this.canvas.addEventListener("pointerup", () => {
       const point = { x: this.input.pointer.worldX, y: this.input.pointer.worldY };
@@ -140,6 +143,8 @@ class App {
   play() {
     this.state.running = true;
     this.state.mode = "play";
+    this.camera.follow = true;
+    this.ui.elements.followCamera.checked = true;
     this.physics.status = this.vehicle.crashed ? "Crashed" : "Running";
   }
 
@@ -226,7 +231,7 @@ class App {
     if (this.editor.dragStart && ["line", "finish", "object"].includes(this.editor.tool)) {
       return { type: "line", a: this.editor.dragStart, b: snapped };
     }
-    if (this.editor.dragStart && ["trigger", "gravityZone"].includes(this.editor.tool)) {
+    if (this.editor.dragStart && ["gravityZone"].includes(this.editor.tool)) {
       return { type: "box", a: { x: Math.min(this.editor.dragStart.x, snapped.x), y: Math.min(this.editor.dragStart.y, snapped.y) }, width: Math.abs(this.editor.dragStart.x - snapped.x), height: Math.abs(this.editor.dragStart.y - snapped.y) };
     }
     if (this.editor.tool === "curve" && this.editor.pendingCurve.length) {

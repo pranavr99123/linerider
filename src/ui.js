@@ -1,5 +1,20 @@
 import { LINE_TYPES, OBJECT_TYPES, PHYSICS_MODES, POWERUP_TYPES, VEHICLES } from "./config.js";
 
+const TOOL_DESCRIPTIONS = {
+  freehand: "Draw a continuous track stroke by dragging across the canvas.",
+  line: "Place one straight segment between two points.",
+  curve: "Click three times to create a smooth curved run.",
+  select: "Select and move a line segment or gravity zone box.",
+  pan: "Click and drag the canvas to move around the world.",
+  eraser: "Erase lines, powerups, checkpoints, objects, gravity zones, start, or finish.",
+  start: "Set the rider spawn point.",
+  checkpoint: "Place a checkpoint respawn marker.",
+  finish: "Draw the finish line the rider must cross.",
+  powerup: "Place a collectible like speed, jump, shield, magnet, or teleport.",
+  object: "Place a moving platform or rotating arm.",
+  gravityZone: "Draw a box with its own gravity vector and drag settings.",
+};
+
 function populate(select, map) {
   select.innerHTML = "";
   for (const [key, item] of Object.entries(map)) {
@@ -21,9 +36,12 @@ export class UI {
       physicsMode: document.getElementById("physicsMode"),
       powerupType: document.getElementById("powerupType"),
       objectType: document.getElementById("objectType"),
+      gravityX: document.getElementById("gravityX"),
+      gravityY: document.getElementById("gravityY"),
+      gravityDrag: document.getElementById("gravityDrag"),
+      toolDescription: document.getElementById("toolDescription"),
       pauseBtn: document.getElementById("pauseBtn"),
       resetBtn: document.getElementById("resetBtn"),
-      stepBtn: document.getElementById("stepBtn"),
       saveBtn: document.getElementById("saveBtn"),
       loadBtn: document.getElementById("loadBtn"),
       sampleBtn: document.getElementById("sampleBtn"),
@@ -66,6 +84,9 @@ export class UI {
     this.elements.physicsMode.addEventListener("change", () => this.app.setPhysicsMode(this.elements.physicsMode.value));
     this.elements.powerupType.addEventListener("change", () => { this.app.editor.powerupType = this.elements.powerupType.value; });
     this.elements.objectType.addEventListener("change", () => { this.app.editor.objectType = this.elements.objectType.value; });
+    this.elements.gravityX.addEventListener("input", () => this.updateGravitySettings());
+    this.elements.gravityY.addEventListener("input", () => this.updateGravitySettings());
+    this.elements.gravityDrag.addEventListener("input", () => this.updateGravitySettings());
     this.elements.gridSnap.addEventListener("change", () => { this.app.state.gridSnap = this.elements.gridSnap.checked; });
     this.elements.endpointSnap.addEventListener("change", () => { this.app.state.endpointSnap = this.elements.endpointSnap.checked; });
     this.elements.followCamera.addEventListener("change", () => { this.app.camera.follow = this.elements.followCamera.checked; });
@@ -73,13 +94,25 @@ export class UI {
     this.elements.motionTrails.addEventListener("change", () => { this.app.state.motionTrails = this.elements.motionTrails.checked; });
     this.elements.pauseBtn.addEventListener("click", () => this.app.pause());
     this.elements.resetBtn.addEventListener("click", () => this.app.resetRun());
-    this.elements.stepBtn.addEventListener("click", () => this.app.stepFrame());
     this.elements.saveBtn.addEventListener("click", () => this.app.exportTrack());
     this.elements.loadBtn.addEventListener("click", () => this.app.importTrack());
     this.elements.sampleBtn.addEventListener("click", () => this.app.loadSampleTrack());
     this.elements.walkthroughBtn.addEventListener("click", () => this.showWalkthrough(true));
     this.elements.walkthroughClose.addEventListener("click", () => this.hideWalkthrough());
     this.elements.timelineSlider.addEventListener("input", () => this.app.scrubReplay(Number(this.elements.timelineSlider.value)));
+  }
+
+  updateGravitySettings() {
+    const gravity = {
+      x: Number(this.elements.gravityX.value),
+      y: Number(this.elements.gravityY.value),
+    };
+    const drag = Math.max(0, Number(this.elements.gravityDrag.value));
+    this.app.editor.gravityZoneSettings = { gravity, drag };
+    const selected = this.app.track.getSelectedGravityZone();
+    if (selected) {
+      this.app.track.updateGravityZone(selected.id, { gravity, drag });
+    }
   }
 
   showWalkthrough(force = false) {
@@ -100,6 +133,13 @@ export class UI {
     for (const button of this.elements.toolButtons) {
       button.classList.toggle("active", button.dataset.tool === this.app.editor.tool);
     }
+    this.elements.toolDescription.textContent = TOOL_DESCRIPTIONS[this.app.editor.tool] || "";
+    const selectedZone = this.app.track.getSelectedGravityZone();
+    const gravity = selectedZone ? selectedZone.gravity : this.app.editor.gravityZoneSettings.gravity;
+    const drag = selectedZone ? selectedZone.drag : this.app.editor.gravityZoneSettings.drag;
+    this.elements.gravityX.value = gravity.x;
+    this.elements.gravityY.value = gravity.y;
+    this.elements.gravityDrag.value = drag;
     this.elements.timerLabel.textContent = `${this.app.physics.runtime.toFixed(2)}s`;
     this.elements.checkpointLabel.textContent = `${this.app.physics.collectedCheckpoints.size} / ${this.app.track.data.checkpoints.length}`;
     this.elements.statusLabel.textContent = this.app.physics.status;

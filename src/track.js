@@ -9,7 +9,9 @@ export class TrackModel {
   reset() {
     this.data = deepClone(DEFAULT_TRACK);
     this.hoveredSegmentId = null;
+    this.hoveredGravityZoneId = null;
     this.selectedSegmentId = null;
+    this.selectedGravityZoneId = null;
     this.undoStack = [];
     this.redoStack = [];
     this.teleportPairSeed = null;
@@ -22,7 +24,9 @@ export class TrackModel {
   load(data) {
     this.data = deepClone(data);
     this.hoveredSegmentId = null;
+    this.hoveredGravityZoneId = null;
     this.selectedSegmentId = null;
+    this.selectedGravityZoneId = null;
     this.undoStack = [];
     this.redoStack = [];
     this.teleportPairSeed = null;
@@ -79,13 +83,8 @@ export class TrackModel {
     }
   }
 
-  addTriggerZone(a, b) {
-    const target = this.data.objects[0]?.id || this.data.gravityZones[0]?.id || null;
-    this.data.triggerZones.push({ id: makeId("trigger"), x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), width: Math.abs(a.x - b.x), height: Math.abs(a.y - b.y), targetId: target, activeState: false });
-  }
-
-  addGravityZone(a, b) {
-    this.data.gravityZones.push({ id: makeId("gzone"), x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), width: Math.abs(a.x - b.x), height: Math.abs(a.y - b.y), gravity: { x: 0, y: -900 }, drag: 0.0002, active: true });
+  addGravityZone(a, b, settings = { gravity: { x: 0, y: -900 }, drag: 0.0002 }) {
+    this.data.gravityZones.push({ id: makeId("gzone"), x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), width: Math.abs(a.x - b.x), height: Math.abs(a.y - b.y), gravity: { x: settings.gravity.x, y: settings.gravity.y }, drag: settings.drag, active: true });
   }
 
   eraseNear(point, radius = 20) {
@@ -130,8 +129,20 @@ export class TrackModel {
     return bestId;
   }
 
+  findHoverGravityZone(point) {
+    const zone = this.data.gravityZones.find((entry) => this.pointHitsRect(point, entry, 0));
+    this.hoveredGravityZoneId = zone?.id || null;
+    return this.hoveredGravityZoneId;
+  }
+
   selectSegment(id) {
     this.selectedSegmentId = id;
+    this.selectedGravityZoneId = null;
+  }
+
+  selectGravityZone(id) {
+    this.selectedGravityZoneId = id;
+    this.selectedSegmentId = null;
   }
 
   getSelectedSegment() {
@@ -145,6 +156,23 @@ export class TrackModel {
     segment.y1 += delta.y;
     segment.x2 += delta.x;
     segment.y2 += delta.y;
+  }
+
+  getSelectedGravityZone() {
+    return this.data.gravityZones.find((zone) => zone.id === this.selectedGravityZoneId) || null;
+  }
+
+  moveSelectedGravityZone(delta) {
+    const zone = this.getSelectedGravityZone();
+    if (!zone) return;
+    zone.x += delta.x;
+    zone.y += delta.y;
+  }
+
+  updateGravityZone(id, updates) {
+    const zone = this.data.gravityZones.find((entry) => entry.id === id);
+    if (!zone) return;
+    Object.assign(zone, updates);
   }
 
   snapPoint(point, useGrid, useEndpoints) {

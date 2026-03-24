@@ -19,25 +19,31 @@ export function applyPowerup(powerup, vehicle, simulation) {
 
 export function collectPowerups(track, vehicle, simulation) {
   const center = vehicle.getCenter();
+  const previousCenter = vehicle.getPreviousCenter();
   for (const powerup of track.data.powerups) {
     if (powerup.active === false) continue;
-    if (dist(center, powerup) > PICKUP_RADIUS + 12) continue;
     if (powerup.type === "teleport") {
+      if (vehicle.teleportCooldown > 0) continue;
+      if (dist(center, powerup) > PICKUP_RADIUS + 12) continue;
+      const enteredFromAbove = previousCenter.y < powerup.y - 2 && center.y >= powerup.y - 2;
+      if (!enteredFromAbove) continue;
       const pair = track.data.powerups.find((item) => item.id !== powerup.id && item.type === "teleport" && item.pairId && item.pairId === powerup.pairId);
       if (pair) {
         const velocity = vehicle.getVelocity();
+        const exitOffset = { x: 0, y: -26 };
         for (const point of vehicle.points) {
           const dx = point.x - center.x;
           const dy = point.y - center.y;
-          point.x = pair.x + dx;
-          point.y = pair.y + dy;
+          point.x = pair.x + dx + exitOffset.x;
+          point.y = pair.y + dy + exitOffset.y;
           point.prevX = point.x - velocity.x / 120;
           point.prevY = point.y - velocity.y / 120;
         }
+        vehicle.teleportCooldown = 0.35;
       }
-      powerup.active = false;
       continue;
     }
+    if (dist(center, powerup) > PICKUP_RADIUS + 12) continue;
     applyPowerup(powerup, vehicle, simulation);
     powerup.active = false;
   }

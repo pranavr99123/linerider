@@ -28,6 +28,7 @@ export class Vehicle {
     this.shield = 0;
     this.magnetTimer = 0;
     this.slowmoTimer = 0;
+    this.teleportCooldown = 0;
     this.trails = [];
     this.detachedRider = null;
   }
@@ -44,6 +45,11 @@ export class Vehicle {
   getVelocity() {
     const sum = this.points.reduce((acc, point) => add(acc, { x: point.x - point.prevX, y: point.y - point.prevY }), { x: 0, y: 0 });
     return scale(sum, 120 / this.points.length);
+  }
+
+  getPreviousCenter() {
+    const sum = this.points.reduce((acc, point) => add(acc, { x: point.prevX, y: point.prevY }), { x: 0, y: 0 });
+    return scale(sum, 1 / this.points.length);
   }
 
   setVelocity(velocity) {

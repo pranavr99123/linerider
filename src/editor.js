@@ -7,6 +7,10 @@ export class Editor {
     this.lineType = "normal";
     this.powerupType = "speed";
     this.objectType = "movingPlatform";
+    this.gravityZoneSettings = {
+      gravity: { x: 0, y: -900 },
+      drag: 0.0002,
+    };
     this.pendingCurve = [];
     this.dragStart = null;
     this.lastFreehandPoint = null;
@@ -28,7 +32,7 @@ export class Editor {
       this.lastFreehandPoint = point;
       return;
     }
-    if (this.tool === "line" || this.tool === "object" || this.tool === "trigger" || this.tool === "gravityZone" || this.tool === "finish") {
+    if (this.tool === "line" || this.tool === "object" || this.tool === "gravityZone" || this.tool === "finish") {
       this.dragStart = point;
       return;
     }
@@ -48,8 +52,10 @@ export class Editor {
     }
     if (this.tool === "select") {
       const id = this.track.findHoverSegment(point, 18);
-      this.track.selectSegment(id);
-      if (id) {
+      const gravityZoneId = id ? null : this.track.findHoverGravityZone(point);
+      if (id) this.track.selectSegment(id);
+      else this.track.selectGravityZone(gravityZoneId);
+      if (id || gravityZoneId) {
         this.track.pushHistory();
         this.selectionDragging = true;
         this.dragStart = point;
@@ -75,13 +81,16 @@ export class Editor {
   move(worldPoint, settings) {
     const point = this.track.snapPoint(worldPoint, settings.gridSnap, settings.endpointSnap);
     this.track.findHoverSegment(point, 18);
+    this.track.findHoverGravityZone(point);
     if (this.tool === "freehand" && this.lastFreehandPoint && dist(point, this.lastFreehandPoint) > 14) {
       this.track.addSegment({ x1: this.lastFreehandPoint.x, y1: this.lastFreehandPoint.y, x2: point.x, y2: point.y, type: this.lineType });
       this.lastFreehandPoint = point;
     }
     if (this.tool === "eraser") this.track.eraseNear(point, 30);
     if (this.tool === "select" && this.selectionDragging && this.dragStart) {
-      this.track.moveSelectedSegment({ x: point.x - this.dragStart.x, y: point.y - this.dragStart.y });
+      const delta = { x: point.x - this.dragStart.x, y: point.y - this.dragStart.y };
+      if (this.track.getSelectedSegment()) this.track.moveSelectedSegment(delta);
+      else this.track.moveSelectedGravityZone(delta);
       this.dragStart = point;
     }
   }
@@ -100,13 +109,9 @@ export class Editor {
       this.track.pushHistory();
       this.track.addObject(this.objectType, this.dragStart, point);
     }
-    if (this.tool === "trigger" && this.dragStart) {
-      this.track.pushHistory();
-      this.track.addTriggerZone(this.dragStart, point);
-    }
     if (this.tool === "gravityZone" && this.dragStart) {
       this.track.pushHistory();
-      this.track.addGravityZone(this.dragStart, point);
+      this.track.addGravityZone(this.dragStart, point, this.gravityZoneSettings);
     }
     this.dragStart = null;
     this.lastFreehandPoint = null;

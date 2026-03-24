@@ -22,7 +22,6 @@
         <div class="button-row compact">
           <button id="pauseBtn">Pause</button>
           <button id="resetBtn">Reset</button>
-          <button id="stepBtn">Step</button>
         </div>
       </section>
       <section class="panel">
@@ -39,9 +38,9 @@
           <button data-tool="finish">Finish</button>
           <button data-tool="powerup">Powerup</button>
           <button data-tool="object">Object</button>
-          <button data-tool="trigger">Trigger</button>
           <button data-tool="gravityZone">Gravity Zone</button>
         </div>
+        <p id="toolDescription" class="tool-description"></p>
       </section>
       <section class="panel">
         <h2>Line Type</h2>
@@ -62,6 +61,19 @@
         </label>
         <label>Object Type
           <select id="objectType"></select>
+        </label>
+      </section>
+      <section class="panel">
+        <h2>Gravity Zone</h2>
+        <p class="tool-description">Draw a box, then use Select to move it or edit these values.</p>
+        <label>Gravity X
+          <input id="gravityX" type="number" value="0" step="50">
+        </label>
+        <label>Gravity Y
+          <input id="gravityY" type="number" value="-900" step="50">
+        </label>
+        <label>Zone Drag
+          <input id="gravityDrag" type="number" value="0.0002" step="0.0001" min="0">
         </label>
       </section>
       <section class="panel">
@@ -102,7 +114,7 @@
       <h2>Quick Walkthrough</h2>
       <p>Draw tracks with `Freehand`, `Line`, or `Curve`. Use `Pan` to click-drag around the world and the mouse wheel to zoom.</p>
       <p>Pick a line type to change how the rider behaves. `Boost`, `Brake`, `Ice`, `Bounce`, and the rest all affect physics differently.</p>
-      <p>Switch to `Play` when you want to simulate. `Pause`, `Reset`, and `Step` are for inspection and debugging.</p>
+      <p>Switch to `Play` when you want to simulate. `Pause` stops the run and `Reset` restarts from the spawn or checkpoint.</p>
       <p>`Start`, `Checkpoint`, `Finish`, `Powerup`, and world-object tools place gameplay pieces directly into the track.</p>
       <p>`Ctrl/Cmd+Z` undoes edits, `Select` moves a segment, and `Eraser` removes nearly anything under the cursor.</p>
       <div class="walkthrough-actions">

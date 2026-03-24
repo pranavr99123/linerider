@@ -70,6 +70,7 @@ export class PhysicsEngine {
     if (this.vehicle.crashed) this.crashElapsed += dt;
     if (this.vehicle.magnetTimer > 0) this.vehicle.magnetTimer = Math.max(0, this.vehicle.magnetTimer - dt);
     if (this.vehicle.slowmoTimer > 0) this.vehicle.slowmoTimer = Math.max(0, this.vehicle.slowmoTimer - dt);
+    if (this.vehicle.teleportCooldown > 0) this.vehicle.teleportCooldown = Math.max(0, this.vehicle.teleportCooldown - dt);
 
     const gravityZone = this.track.data.gravityZones.find((zone) => zone.active !== false && detectRectHit(this.vehicle.getCenter(), zone));
     const currentGravity = gravityZone ? zoneGravity(gravityZone, this.gravity) : this.gravity;

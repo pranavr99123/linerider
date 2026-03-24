@@ -239,7 +239,9 @@ class App {
     const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.05);
     this.lastTimestamp = timestamp;
     if (this.state.running) {
-      if (this.vehicle.crashed) this.physics.respawn();
+      if (this.vehicle.crashed && this.physics.crashElapsed >= this.physics.respawnDelay) {
+        this.physics.respawn();
+      }
       this.physics.update(dt);
     }
     const dynamicSegments = buildDynamicSegments(this.track.data.objects, this.physics.time);

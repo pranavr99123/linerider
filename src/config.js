@@ -124,7 +124,7 @@ export const OBJECT_TYPES = {
 export const DEFAULT_TRACK = {
   settings: { physicsMode: "earth", vehicleType: "sled", gridSnap: false, endpointSnap: true },
   start: { x: 160, y: 120 },
-  finish: { x1: 760, y1: 100, x2: 760, y2: -100 },
+  finish: null,
   segments: [],
   powerups: [],
   checkpoints: [],

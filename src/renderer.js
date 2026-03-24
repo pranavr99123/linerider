@@ -159,6 +159,10 @@ export class Renderer {
     ctx.beginPath();
     ctx.arc(s.x, s.y, 5, 0, Math.PI * 2);
     ctx.fill();
+    if (!finish) {
+      ctx.restore();
+      return;
+    }
     const a = this.camera.worldToScreen({ x: finish.x1, y: finish.y1 });
     const b = this.camera.worldToScreen({ x: finish.x2, y: finish.y2 });
     ctx.strokeStyle = "#111111";
@@ -225,6 +229,9 @@ export class Renderer {
     ctx.strokeStyle = vehicle.crashed ? "#444444" : vehicle.definition.color;
     ctx.lineWidth = 2.5;
     this.drawVehicleShape(vehicle);
+    if (vehicle.detachedRider) {
+      this.drawDetachedRider(vehicle.detachedRider);
+    }
     if (vehicle.shield > 0) {
       ctx.strokeStyle = "#333333";
       ctx.beginPath();
@@ -256,7 +263,9 @@ export class Renderer {
     ctx.lineTo(rear.x + 7, rear.y - 10);
     ctx.lineTo(front.x - 8, front.y - 11);
     ctx.stroke();
-    this.drawStickRider(seat, head, front);
+    if (!vehicle.detachedRider) {
+      this.drawStickRider(seat, head, front);
+    }
   }
 
   drawBike(vehicle) {
@@ -287,11 +296,13 @@ export class Renderer {
     ctx.moveTo(top.x, top.y);
     ctx.lineTo(front.x - 6 * this.camera.zoom, front.y - 18 * this.camera.zoom);
     ctx.stroke();
-    this.drawStickRider(seat, head, hands);
-    ctx.beginPath();
-    ctx.moveTo(hands.x, hands.y);
-    ctx.lineTo(front.x + 8 * this.camera.zoom, front.y - 24 * this.camera.zoom);
-    ctx.stroke();
+    if (!vehicle.detachedRider) {
+      this.drawStickRider(seat, head, hands);
+      ctx.beginPath();
+      ctx.moveTo(hands.x, hands.y);
+      ctx.lineTo(front.x + 8 * this.camera.zoom, front.y - 24 * this.camera.zoom);
+      ctx.stroke();
+    }
   }
 
   drawCapsule(vehicle) {
@@ -310,7 +321,9 @@ export class Renderer {
     ctx.beginPath();
     ctx.arc((nose.x + seat.x) * 0.5, (nose.y + seat.y) * 0.5, 10 * this.camera.zoom, 0, Math.PI * 2);
     ctx.stroke();
-    this.drawStickRider(seat, head, { x: seat.x + 8 * this.camera.zoom, y: seat.y + 8 * this.camera.zoom });
+    if (!vehicle.detachedRider) {
+      this.drawStickRider(seat, head, { x: seat.x + 8 * this.camera.zoom, y: seat.y + 8 * this.camera.zoom });
+    }
   }
 
   drawStickRider(seat, head, hands) {
@@ -333,6 +346,27 @@ export class Renderer {
     ctx.moveTo(seat.x, seat.y);
     ctx.lineTo(seat.x + 6 * this.camera.zoom, seat.y + 14 * this.camera.zoom);
     ctx.stroke();
+  }
+
+  drawDetachedRider(detachedRider) {
+    const ctx = this.ctx;
+    const [head, torso, hands, leftFoot, rightFoot] = detachedRider.points.map((point) => this.camera.worldToScreen(point));
+    ctx.save();
+    ctx.strokeStyle = "#111111";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(head.x, head.y, 6 * this.camera.zoom, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(head.x, head.y + 6 * this.camera.zoom);
+    ctx.lineTo(torso.x, torso.y);
+    ctx.lineTo(leftFoot.x, leftFoot.y);
+    ctx.moveTo(torso.x, torso.y);
+    ctx.lineTo(rightFoot.x, rightFoot.y);
+    ctx.moveTo(torso.x, torso.y - 1 * this.camera.zoom);
+    ctx.lineTo(hands.x, hands.y);
+    ctx.stroke();
+    ctx.restore();
   }
 
   drawGhost(frame) {

@@ -29,6 +29,7 @@ export class Vehicle {
     this.magnetTimer = 0;
     this.slowmoTimer = 0;
     this.trails = [];
+    this.detachedRider = null;
   }
 
   reset(start) {
@@ -77,4 +78,74 @@ export class Vehicle {
       }
     }
   }
+
+  crash() {
+    if (this.crashed) {
+      return;
+    }
+    this.crashed = true;
+    const velocity = this.getVelocity();
+    const center = this.getCenter();
+    const headPoint = this.findRolePoint("head") || this.points[0];
+    const seatPoint = this.findRolePoint("seat") || center;
+    const handsPoint = this.findRolePoint("hands") || { x: seatPoint.x + 8, y: seatPoint.y - 2 };
+    this.detachedRider = {
+      points: [
+        createDetachedPoint(headPoint, { x: velocity.x * 0.011 + 1.2, y: velocity.y * 0.011 - 2.5 }, 6),
+        createDetachedPoint(seatPoint, { x: velocity.x * 0.01 - 0.8, y: velocity.y * 0.01 - 1.4 }, 4),
+        createDetachedPoint(handsPoint, { x: velocity.x * 0.01 + 2.6, y: velocity.y * 0.01 - 1.1 }, 3),
+        createDetachedPoint({ x: seatPoint.x - 8, y: seatPoint.y + 14 }, { x: velocity.x * 0.01 - 2.1, y: velocity.y * 0.01 + 1.5 }, 3),
+        createDetachedPoint({ x: seatPoint.x + 7, y: seatPoint.y + 14 }, { x: velocity.x * 0.01 + 1.7, y: velocity.y * 0.01 + 1.1 }, 3),
+      ],
+      links: [
+        [0, 1, 18],
+        [1, 2, 16],
+        [1, 3, 18],
+        [1, 4, 18],
+      ],
+    };
+  }
+
+  updateDetachedRider(gravity, drag, dt) {
+    if (!this.detachedRider) {
+      return;
+    }
+    for (const point of this.detachedRider.points) {
+      const vx = point.x - point.prevX;
+      const vy = point.y - point.prevY;
+      point.prevX = point.x;
+      point.prevY = point.y;
+      point.x += vx * (1 - drag * 0.4) + gravity.x * dt * dt;
+      point.y += vy * (1 - drag * 0.4) + gravity.y * dt * dt;
+    }
+    for (let i = 0; i < 3; i += 1) {
+      for (const [aIndex, bIndex, lengthTarget] of this.detachedRider.links) {
+        const a = this.detachedRider.points[aIndex];
+        const b = this.detachedRider.points[bIndex];
+        const delta = sub(b, a);
+        const distance = len(delta) || 1;
+        const diff = (distance - lengthTarget) / distance;
+        const adjust = scale(delta, 0.5 * diff);
+        a.x += adjust.x;
+        a.y += adjust.y;
+        b.x -= adjust.x;
+        b.y -= adjust.y;
+      }
+    }
+  }
+
+  findRolePoint(role) {
+    const index = this.definition.points.findIndex((point) => point.role === role);
+    return index >= 0 ? this.points[index] : null;
+  }
+}
+
+function createDetachedPoint(origin, impulse, radius) {
+  return {
+    x: origin.x,
+    y: origin.y,
+    prevX: origin.x - impulse.x,
+    prevY: origin.y - impulse.y,
+    radius,
+  };
 }

@@ -107,9 +107,11 @@ export class TrackModel {
     if (dist(point, this.data.start) <= radius) {
       this.data.start = { x: DEFAULT_TRACK.start.x, y: DEFAULT_TRACK.start.y };
     }
-    const finishMid = { x: (this.data.finish.x1 + this.data.finish.x2) * 0.5, y: (this.data.finish.y1 + this.data.finish.y2) * 0.5 };
-    if (dist(point, finishMid) <= radius) {
-      this.data.finish = deepClone(DEFAULT_TRACK.finish);
+    if (this.data.finish) {
+      const finishMid = { x: (this.data.finish.x1 + this.data.finish.x2) * 0.5, y: (this.data.finish.y1 + this.data.finish.y2) * 0.5 };
+      if (dist(point, finishMid) <= radius) {
+        this.data.finish = deepClone(DEFAULT_TRACK.finish);
+      }
     }
     return before !== this.data.segments.length + this.data.powerups.length + this.data.checkpoints.length + this.data.objects.length + this.data.triggerZones.length + this.data.gravityZones.length;
   }

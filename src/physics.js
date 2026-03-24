@@ -24,6 +24,8 @@ export class PhysicsEngine {
     this.airDrag = PHYSICS_MODES.earth.airDrag;
     this.maxVelocity = PHYSICS_MODES.earth.maxVelocity;
     this.collisions = [];
+    this.crashElapsed = 0;
+    this.respawnDelay = 1.25;
   }
 
   configureMode(modeKey) {
@@ -43,6 +45,7 @@ export class PhysicsEngine {
     this.collectedCheckpoints = new Set();
     this.lastCheckpoint = this.track.data.start;
     this.collisions = [];
+    this.crashElapsed = 0;
     this.replay.reset();
   }
 
@@ -64,6 +67,7 @@ export class PhysicsEngine {
   step(dt) {
     this.time += dt;
     if (!this.vehicle.crashed && !this.completed) this.runtime += dt;
+    if (this.vehicle.crashed) this.crashElapsed += dt;
     if (this.vehicle.magnetTimer > 0) this.vehicle.magnetTimer = Math.max(0, this.vehicle.magnetTimer - dt);
     if (this.vehicle.slowmoTimer > 0) this.vehicle.slowmoTimer = Math.max(0, this.vehicle.slowmoTimer - dt);
 
@@ -111,6 +115,7 @@ export class PhysicsEngine {
     this.vehicle.updateAngle();
     this.enforceVelocityClamp();
     this.evaluateState();
+    this.vehicle.updateDetachedRider(currentGravity, currentDrag, dt);
     collectPowerups(this.track, this.vehicle, this);
     this.processCheckpoints();
     this.processTriggers();
@@ -140,7 +145,10 @@ export class PhysicsEngine {
     });
     if (!this.vehicle.crashed && speed > this.vehicle.definition.crashSpeed && hardImpact) {
       if (this.vehicle.shield > 0) this.vehicle.shield = 0;
-      else this.vehicle.crashed = true;
+      else {
+        this.vehicle.crash();
+        this.crashElapsed = 0;
+      }
     }
   }
 
@@ -188,6 +196,8 @@ export class PhysicsEngine {
     this.vehicle.setVelocity({ x: 0, y: 0 });
     this.vehicle.crashed = false;
     this.vehicle.shield = 0;
+    this.vehicle.detachedRider = null;
+    this.crashElapsed = 0;
     this.status = "Running";
   }
 }

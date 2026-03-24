@@ -185,6 +185,8 @@ textarea {
   height: 100%;
   display: block;
   background: #ffffff;
+  touch-action: none;
+  user-select: none;
 }
 
 .walkthrough {

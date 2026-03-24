@@ -92,6 +92,9 @@ class App {
   attachCanvasHandlers() {
     this.canvas.addEventListener("pointerdown", () => {
       const point = { x: this.input.pointer.worldX, y: this.input.pointer.worldY };
+      if (this.editor.tool === "pan") {
+        this.input.startPan();
+      }
       if (this.input.panActive || this.editor.tool === "pan") return;
       if (this.state.mode === "edit") this.editor.begin(point, this.state);
     });

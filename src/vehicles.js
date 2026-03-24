@@ -91,6 +91,25 @@ export class Vehicle {
     }
   }
 
+  stabilizeAirbornePose(amount = 0.04) {
+    const center = this.getCenter();
+    const centerVelocity = this.getVelocity();
+    for (const point of this.points) {
+      const pointVelocity = {
+        x: (point.x - point.prevX) * 120,
+        y: (point.y - point.prevY) * 120,
+      };
+      const blendedVelocity = {
+        x: pointVelocity.x + (centerVelocity.x - pointVelocity.x) * amount,
+        y: pointVelocity.y + (centerVelocity.y - pointVelocity.y) * amount,
+      };
+      point.prevX = point.x - blendedVelocity.x / 120;
+      point.prevY = point.y - blendedVelocity.y / 120;
+      point.x += (center.x - point.x) * amount * 0.08;
+      point.y += (center.y - point.y) * amount * 0.08;
+    }
+  }
+
   updateVisualState() {
     const rearWheel = this.findRolePoint("rearWheel");
     const frontWheel = this.findRolePoint("frontWheel");
